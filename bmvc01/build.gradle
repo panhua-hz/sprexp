@@ -1,0 +1,71 @@
+/*
+ * https://docs.gradle.org/current/userguide/userguide.html
+ */
+
+apply plugin: 'eclipse'  
+apply plugin: 'war'
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    def sprVern = "4.3.7.RELEASE"
+    def junitVer = "4.11"
+    def tilesVer = "3.0.7"
+
+    //log4j2
+    compile "org.slf4j:slf4j-api:1.7.23"
+    compile "org.apache.logging.log4j:log4j-slf4j-impl:2.7"
+    compile "org.apache.logging.log4j:log4j-core:2.7"
+
+    //util
+    compile "org.apache.commons:commons-lang3:3.5"
+
+    //database
+    compile "org.springframework:spring-jdbc:$sprVern"
+    compile "com.h2database:h2:1.4.194"
+    //compile project(':sdsaa')
+    
+    //web: hibernate-validator is used on form validate
+    compile "org.springframework:spring-webmvc:$sprVern"
+    compile "org.hibernate:hibernate-validator:5.4.1.Final"
+    //view related
+    compile "javax.servlet:jstl:1.2"
+    compile "org.thymeleaf:thymeleaf-spring4:3.0.5.RELEASE"
+
+    providedCompile "javax.servlet:javax.servlet-api:3.1.0"
+    providedCompile "javax.servlet.jsp:jsp-api:2.2"
+    providedCompile "javax.el:javax.el-api:3.0.0"
+    
+    testCompile 'junit:junit:4.12'
+    testCompile "junit:junit-dep:4.11"
+    testCompile "org.springframework:spring-test:$sprVern"
+    testCompile "org.mockito:mockito-core:2.7.9"
+    testCompile 'com.github.stefanbirkner:system-rules:1.16.1'
+    testCompile "org.hamcrest:hamcrest-library:1.3"
+}
+
+war {
+    baseName = 'bmvc01'
+}
+eclipse {
+    project{
+        comment='spring mvc'
+    }
+    wtp {
+        facet {
+            file {
+                withXml { xml ->
+                    def node = xml.asNode()
+                    node.appendNode('installed',[facet: 'wst.jsdt.web', version: '1.0'])
+            		
+                }
+            }
+        }
+        component {
+            contextPath = 'bmvc'
+        }
+    }
+}
+
