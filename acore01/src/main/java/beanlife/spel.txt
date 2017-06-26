@@ -1,0 +1,26 @@
+1. 字面量
+	#{3.14159} #{9.87E4} #{'Hello'} #{false} 
+2. 引用bean
+	#{helloBean} #{helloBean.loginUser} #{helloBean.sayHello()}
+	#{helloBean.getLoginUser()?.toUpperCase()}  ?.操作符用来处理null不抛Exception
+3. 类型引用 T():
+	#{T(System).currentTimeMillis()}
+4. 运算符
+	算术：+-*/%^  ^乘方   +对于字符串可以作为连接
+	比较：< > == <= >= lt gt eq le ge
+	逻辑：and or not |
+	条件：一种#{scoreboard.score>1000?"Winner!":"Loser"}, 一种#{disc.title?:'No title'} 如果是 null就 给个默认值
+	正则：#{admin.email matches '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.com'} 使用matches
+
+5. 集合:
+	#{prodList[4].title}
+	#{prodList[other expression to number].title}
+	过滤:
+	#{jukebox.songs.?[artist eq 'Aerosmith']}  	.?[]表达式用来匹配查询得到子集合
+	#{jukebox.songs.^[artist eq 'Aerosmith']}	.^[]匹配的第一个
+	#{jukebox.songs.$[artist eq 'Aerosmith']}  	.$[]匹配的最后一个
+	#{jukebox.songs.?[artist eq 'Aerosmith'].![title]}  投影得到一个新的集合类似stream.map操作
+	
+
+	
+

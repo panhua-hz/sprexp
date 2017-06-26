@@ -1,0 +1,20 @@
+1. 在config里面打开aspectj: @EnableAspectJAutoProxy
+2. 对于切面使用@Aspect注解;
+3. 切面类依然是一个bean; 可以通过@Component和@ComponentScan或者用@bean来加载
+4. 定义切点：@Pointcut
+	execution(<return> <package.class.method(paramsType)>): *匹配return, package等等; ..用来匹配参数 
+	within指定类型，可以*
+	@annotation：
+		@annotation(jvcore.ToLog) 表示匹配一个annotation的类；
+		@annotation(tolog) 匹配annotation的实例，可以在advisor通知方法的参数使用这个参数.
+	args(param) param表示一个变量名称，可以在通知方法中作为参数使用. 
+5. 定位@Around/@Before/@After/@AfterReturning/@AfterThrowing
+6. ProceedingJoinPoint可以定位类/实例/方法/参数/签名等等
+7. 动态代理可以引入新的接口：
+	1) 定义要引入的接口Encoreable;
+	2) 实现这个接口DefaultEncoreable
+	3) 在切面通知里面定义static变量;
+	4) static变量加上annotation: @DeclareParents指明要扩展的原接口，扩展的默认实现类;
+	5) 可以把原接口的对象转化为扩展接口并调用它的默认实现。
+	通过这样的方式可以扩展接口实现。但其实也没啥用把
+8. 还支持原生aspectj.这个先不学了。

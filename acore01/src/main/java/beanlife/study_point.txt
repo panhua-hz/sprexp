@@ -1,0 +1,9 @@
+1. bean的生命周期，可以实现多个接口 以保证在spring初始化的时候插入代码；
+	HelloBean1Impl implements HelloBean1, BeanNameAware, BeanFactoryAware
+2. bean默认单列模式,若改变可以在@Component下面加上@scope注解
+3. Profile使用. 通过配置系统环境属性: spring.profiles.active 和 spring.profiles.default 来决定使用哪个profile
+4. Environment使用:
+	在Configure里面load: 使用@PropertySource
+	可以直接自动装配变量Environment env;
+5. 使用PropertySourcesPlaceholderConfigurer可以使用@Value("${fName}")占位符
+6. 通过@Qualifier来限定装配，参考书本。
