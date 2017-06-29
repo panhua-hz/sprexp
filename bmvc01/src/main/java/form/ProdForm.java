@@ -1,6 +1,12 @@
 package form;
 
+import javax.validation.constraints.Size;
+
+import org.hibernate.validator.constraints.NotBlank;
+
 public class ProdForm {
+	@NotBlank
+	@Size(min = 1, max = 20, message="{prodForm.prodName.size}")
 	private String prodName;
 	
 	public ProdForm(){

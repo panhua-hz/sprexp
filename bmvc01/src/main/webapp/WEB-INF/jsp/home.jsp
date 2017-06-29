@@ -13,16 +13,24 @@
 </head>
 <body>
 	<h1>
-		Hello
+		<s:message code="app.welcome" />
 	</h1>
 	<div>
 	<sf:form method="POST" modelAttribute="prodForm" acceptCharset="UTF-8">
+		<!-- cloud setup cssClass/cssErrorClass here -->
 		<sf:label path="prodName">Product Name</sf:label>
 		<sf:input path="prodName"/>
+		<sf:errors path="prodName"/>
 		<br>
 		<input type="submit" value="Add Prod to Cart" />
 	</sf:form>
+	
+	<c:if test="${not empty recentProd}">
+		<br>
+		Recent Add Prod: <c:out value="${recentProd.prodName}"/>
+	</c:if>
 	</div>
+	
 	<div>
 		<h3>Shopping Cart</h3>
 		<dl>
@@ -35,6 +43,25 @@
 				</dd>
 			</c:forEach>
 		</dl>
+	</div>
+	<div>
+		<h3>request parameters</h3>
+		<a href="<c:url value="/query?prodName=red apple" />">RPC Query</a>
+		<br>
+		<a href="<c:url value="/query/prodName/red apple" />">Resource Query</a>
+		<br>
+		<a href="<c:url value="/npexpt" />">NullPointException</a>
+		<br>
+		<a href="<c:url value="/oobexpt" />">IndexOutOfBoundsException</a>
+		<br>
+	</div>
+	<div>
+		<h3>文件上传</h3>
+		<form action="file" method="post" enctype="multipart/form-data">
+			<label>Profile Picture: </label>
+			<input type="file" name="uploadFile" accept="image/jpeg,image/png,image/gif,image/jpg"/><br/>
+			<input type="submit" value="UploadFile" />
+		</form>
 	</div>	
 </body>
 </html>

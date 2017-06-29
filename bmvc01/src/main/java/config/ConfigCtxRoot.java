@@ -2,10 +2,10 @@ package config;
 
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-
-import session.*;
+import org.springframework.context.annotation.PropertySource;
 
 @Configuration
+@PropertySource("classpath:application.properties")
 @ComponentScan("session")
 public class ConfigCtxRoot {
 
