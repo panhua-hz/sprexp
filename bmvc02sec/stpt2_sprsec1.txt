@@ -1,0 +1,118 @@
+安全相关
+1. 存储访问控制列表如用户名/密码/角色等等的地方可以有
+	1) 内存存储: 需要h2的包;--!!!!1注意这个我研究了很久.-----------
+	2) 用户服务接口UserDetailsService;
+	3) LDAP
+	4) JDBC存储,匹配固定的查询语句.
+2. 配置过滤器:
+ 1) web.xml 配置DelegatingFilterProxy;
+ 2) 通过java配置
+	不是在AbstractAnnotationConfigDispatcherServletInitializer加filter;
+	而是继承AbstractSecurityWebApplicationInitializer
+	由于过滤器有先后作用，对于CharacterEncodingFilter (charset问题),只能移动到security处理之前。
+	在委托的WebSecurityConfigurerAdapter里面配置i18n的过滤器。!!!!2注意这个问题
+	见configure(HttpSecurity http)可以配置过滤器顺序。
+ 3) 具体配置:
+ 	a. 定义InitMvcSecurity extends AbstractSecurityWebApplicationInitializer;
+ 	b. 定义public class ConfigCtxSecurity extends WebSecurityConfigurerAdapter;
+ 	c. 注意记得把ConfigCtxSecurity加入到InitMvcWeb里面.--!!!!!!3注意:这个是固定用法spring的例子也是把它加入到getRootConfigClasses.
+ 	d. ConfigCtxSecurity注解 @Configuration @EnableWebSecurity
+ 	e. 覆盖configure(AuthenticationManagerBuilder auth) 和 configure(HttpSecurity http)
+3. 	如何配置ConfigCtxSecurity：
+	1) config(WebSecurity) 用来配置spring Security的Filter链;
+		例子较少，后续补充...
+	2) config(HttpSecurity) 定义request/view相关的规则，包括可以添加设置过滤器顺序，view的验证拦截规则;
+		!!!!4注意顺序问题: 具体的路径规则放前面，不具体的放后面，类似于Exception。
+	  	.authorizeRequests(): 对于authorizeRequests应用如下规则
+			a. 定义路径:
+				antMatchers:
+					.antMatchers("/xx/**").authenticated()
+					.antMatchers(HttpMethod.POST,"/spitter/**").authenticated()
+				regexMatchers:
+					.regexMatchers("/xx/.*").authenticated()
+				anyRequest(): 如果放最后匹配剩余的请求。
+			b. 应用规则:对应上面的路径可以应用规则:
+				缺点: 下面规则是一维的,即对于上面给定路径,只能接下面一个方法.
+				access(String): 用来匹配spel表达式为true的; 
+				anonymous(): 允许匿名访问;
+				authenticated(): 允许认证用户访问;
+				denyAll(): 拒绝访问;
+				fullyAuthenticated(): 需要完整认证非Remember-me认证;
+				hasAnyAuthority(String...) 具备给定权限列表中的一个允许访问;
+				hasAnyRole(String...) 具备给定角色列表中一个允许访问;
+				hasAuthority(String)
+				hasRole(String) 
+				hasIpAddress(String) 来自于给定ip允许访问;
+				not() 表示对之前的规则取反;
+				permitAll() 允许访问;
+				rememberMe() 对于Remember-me认证允许访问: 
+					!!问题:这个跟启用Remember-me相似，应该会有所区别吧。
+					一个是约束访问规则，一个是启用功能接在and()后面。
+			c.  SPEL表达式: 字符串一般用单引号''
+				被access调用，可以实现多维规则.
+				首先注意2个对象
+					authentication: 用户的认证对象
+					principal:用户的principal对象!
+				表达式方法返回true/false:			
+					denyAll: 
+					hasAnyRole(list of roles): 
+					hasRole('')
+					hasIpAddress('')
+					isAnonymous()
+					isAuthenticated()
+					isFullyAuthenticated()
+					isRememberMe()
+					permitAll
+	  	.requiresChannel() :请求通道与authorizeRequests同级别,可以用and连接
+			.and()
+			.requiresChannel()
+			.antMatchers("/xx/**")
+			.requiresSecure()或者.requiresInecure()
+	  	.formLogin(): 定义认证页面有默认认证页面. 与authorizeRequests同级别
+	  		.loginPage("/login") 定义login视图类似于定义路径
+	  		.permitAll() 定义规则.
+	  	.httpBasic: 定义http basic认证以支持第三方客户端
+	  		.realmName("myapp")	 
+		.rememberMe(): 开启rememberMe功能. 具体见4.
+			.tokenValitySeconds(2419200); 设置token有效时间. 如果不调用的话默认两周
+			.key("myapp") 设置token的私钥名.默认为SpringSecured.
+			
+			下面两个例子:
+				前面加and()表示这个rememberMe()与authorizeRequests同级别
+				对于不同的AuthenticationManagerBuilder设置会使用不同的设置rememberMe设置
+			and().rememberMe().tokenValiditySeconds(1440).key("mysay")  //给userDetailsService auth使用
+			下面这个猜想是给内存存储使用的?没有试验
+			and().rememberMe().tokenRepository(new InMemoryTokenRepositoryImpl()).tokenValiditySeconds(1440).key("mynoteKey")
+			
+		.logout(): 设置logout的定制.有默认的配置,但是想定制调用如下方法: 
+			logoutSuccessUrl("/"): logout之后重定向页面;
+			logoutUrl("/signout"): logout过滤器的拦截路径; 
+	3) config(AuthenticationManagerBuilder) 定义访问控制数据，比如设置用户和权限等信息；
+		注意密码加密转码的实现
+4. Remember-me功能: !!!注意我没有验证是否实现该功能
+	原理: 通过cookie中存储token,token包含了用户名,密码,过期时间.在上面描述中设置.
+	表单: 在登录请求中包含参数: remember-me. 比如下列代码：
+	<input id="remember_me" name="remember-me" type="checkbox"/>
+	<label for="remember_me">Remember me</label>
+5. 退出logout:
+	原理: 通过Filter(LogoutFilter)实现的,
+	默认拦截/logout请求,可以通过logoutUrl设置;
+	logout后默认重定向到/login?logout, 可以通过logoutSuccessUrl设置.	
+	实践出真知:
+	1) url定位到logout,没用,出现404错误:
+		<a href="<c:url value="logout" />"><font size="2">logout</font></a>
+	2) 下面logout是直接重定向,不会真实删除cookie中的token:
+	<a href="<c:url value="/login?logout" />"><font size="2">logout</font></a>
+	3) 只有下面的方式可以正确删除token然后重定向到/login?logout页面.
+		<sf:form method="POST" action="logout">
+			<input type="submit" value="Sign Out"/>
+		</sf:form>
+	!!!!5. 感觉用get好像不能sign off, 需要用post.
+6. CSRF防护:
+	对于jsp的form加入下面代码:
+	<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
+问题:
+安全框架的整体原理，需要了解过滤器链是怎样的，如果加入新的过滤器怎么做？
+用户登录与session关系.
+https://spring.io/guides/topicals/spring-security-architecture/
+	

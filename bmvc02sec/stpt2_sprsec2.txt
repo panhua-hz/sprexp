@@ -1,0 +1,36 @@
+AuthenticationManagerBuilder auth:
+1. jdbc auth:
+	auth.jdbcAuthentication().dataSource(dataSource)
+		.usersByUsernameQuery("select username, password, 'true' from user where username=?")
+		.authoritiesByUsernameQuery("select username, 'ROLE_USER' from user where username=?");
+2. userDetailsService auth: 实现接口UserDetailsService.
+	auth.userDetailsService(new UserDetailsService(){
+		@Override
+		public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+			boolean userFound = false;
+			//TODO: find user;
+			if (userFound){
+				GrantedAuthority[] authoritiesArr = new GrantedAuthority[1];
+				Arrays.fill(authoritiesArr, new SimpleGrantedAuthority("ROLE_USER"));
+				List<GrantedAuthority> authorities = Arrays.asList(authoritiesArr);
+				return new User(username,"aaa",authorities);
+			}else{
+				throw new UsernameNotFoundException(username);
+			}
+		}
+	})
+3. LDAP:
+	1) 定义一个ldap的连接:
+		@Bean
+		public DefaultSpringSecurityContextSource contextSource() {
+			//return  new DefaultSpringSecurityContextSource(Arrays.asList("ldap://localhost:8389/"), "dc=springframework,dc=org");
+			return new DefaultSpringSecurityContextSource(Arrays.asList("ldap://localhost:10389"), "dc=springframework,dc=org");
+		}	
+	2) 如下代码:
+	auth.ldapAuthentication()
+		.userDnPatterns("uid={0},ou=people")
+		.groupSearchBase("ou=groups")
+		.contextSource(contextSource())
+		.passwordCompare()
+		.passwordEncoder(new LdapShaPasswordEncoder()) //注意这里是经过转码的,ldap中要存加密后的密码?
+		.passwordAttribute("userPassword");		  
