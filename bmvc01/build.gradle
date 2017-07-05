@@ -23,8 +23,8 @@ dependencies {
     compile "org.apache.commons:commons-lang3:3.5"
 
     //database
-    compile "org.springframework:spring-jdbc:$sprVern"
-    compile "com.h2database:h2:1.4.194"
+    //compile "org.springframework:spring-jdbc:$sprVern"
+    //compile "com.h2database:h2:1.4.194"
     //compile project(':sdsaa')
     
     //web: hibernate-validator is used on form validate
@@ -33,6 +33,7 @@ dependencies {
     //view related
     compile "javax.servlet:jstl:1.2"
     compile "org.thymeleaf:thymeleaf-spring4:3.0.5.RELEASE"
+    compile "com.fasterxml.jackson.core:jackson-databind:2.8.9"
 
     providedCompile "javax.servlet:javax.servlet-api:3.1.0"
     providedCompile "javax.servlet.jsp:jsp-api:2.2"

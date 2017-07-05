@@ -17,7 +17,7 @@ public class ShoppingCartImpl implements ShoppingCart {
 	
 	public ShoppingCartImpl(){
 		System.out.println("ShoppingCartImpl Construction");
-		prodList = new ArrayList<>();
+		prodList = new ArrayList<>(); //Have thread issue!!!!!
 	}
 	
 	@Override

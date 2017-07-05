@@ -1,0 +1,161 @@
+REST: 简洁的讲: REST就是将资源状态以最适合的表述形式实现客户端和服务器端的转移.
+  1. 表述性Representational: 资源如何表述指可以以任何方式表述,包括xml/json/html都可以;
+  2. 状态State: 我们关注资源的状态,而不是'对'资源的行为; 
+      --没看懂,状态指什么?资源有哪些状态? 行为会混淆成状态吗？
+      --个人理解: 基于这个理解是否资源的状态包括: 
+        是否新建, 是否更新, 是否存在, 资源内容, 资源大小, 哪些角色,用户可以访问等等. 难道说这个就是资源的核心? 是否理解有误?
+  3. 转移Transfer: 以某种表述从一个应用转移到另一个应用.
+      --个人理解: 把资源从一种表述转移为另外一种表述. 
+  
+如何实现:
+  1. 通过url识别和定位资源; (而不是发一条命令)
+  2. Rest中的行为:
+    rest中会有行为, 但我们应该关注的核心是事务(我理解为状态), 而不是行为.
+    通过http的方法来定义
+    Create: POST  ----非幂等,不支持多次对相同的资源执行相同的行为.
+    Read: GET
+    Update: PUT/PATCH
+    Delete: DELETE
+  3. 我理解，正是由于http的行为对url所定义的资源进行状态修改.
+
+Spring如何支持资源的rest的:
+  1. 支持http的方法以改变资源的状态; GET/PUT/DELETE/POST/PATCH; 通过 @Controller, @RequestMapping来处理
+  2. 对于url进行处理, 能够定位资源; 使用 @PathVariable注解;
+  3. 通过view/viewResolver,可以实现相同资源的不同表述. 可以通过解析请求中的数据或者其他方式决定表述方式.
+    a. ContentNegotiatingViewResolver来自动选择不同表述;
+    b. 通过 @ReponseBody和HttpMethodConverter实现定制的表述;
+    c. 抄袭: 借助RestTemplate, Spring应用可以方便的使用资源.
+  
+  通过上面的描述, 对于spring, 对于资源进行rest处理，需要关注于资源的不同表述方式.
+  需要理解怎么从不同途径找到目标所需要的表述方式.
+------------------------------------------------------------------------------------
+实现不同表述
+1. 内容协商(Content nigotiation):
+  a. 配置:
+    配置ViewResolver为ContentNegotiatingViewResolver:
+      @Bean
+      public ViewResolver cnViewResolver(){
+        return new ViewResolver为ContentNegotiatingViewResolver();
+      }
+  b. 确定请求的媒体类型策略:
+    1) 基于url中的扩展名;  
+    2) 基于Accept头部信息;
+    3) 基于默认的;
+  c. 内容协商的限制:
+    内容协商在于能够根据一些信息智能决定客户端的视图表现.
+    由于这种智能,可以对相同的视图返回值智能的决定表现以至于可以省却控制器代码. 一个方法可以满足多种不同的客户端.
+    正是由于这些智能,导致不容易定制.
+    比如json列表的排版问题。
+    由于CN仅仅是一个viewResolver,所以只能决定response,无法决定request的表述.
+    由于这些原因,推荐使用下面的消息转化器.
+
+2. 消息转化器(Message conversion):
+  a. 对请求进行转化;
+  b. 对响应进行转化;
+---------------------
+响应返回不同资源表述:
+  首先注意,这里所有的方法返回的不是视图名字,而是java对象，这个对象就是资源,消息转化就是把这个对象进行表述.
+  1. @ResponseBody
+    例子1: 
+      ----
+      @RequestMapping(method=RequestMethod.GET, produces="application/json")
+      public @ResponseBody List<Spittle> spittles(){
+        ...
+        return list;
+      }
+      ----
+      a.
+      @ResponseBody使得返回的list作为资源发送给客户端.
+      Spring考虑请求中的Accetp头信息来转化输出.
+      b.
+      @RequestMapping中的produces属性表明它只接受Accept为application/json的请求.
+      对于别的请求就不管了
+      而这样的请求会返回json的输出.
+    对于json的返回格式可以使用json注解(Jackson映射注解).
+    see: http://wiki.fasterxml.com/Jackson-Annotations.
+  2. 可以把 @Controller 改为 @RestController,这样可以省略 @ResponseBody在每个方法使用.
+    但是只能做默认的消息转化.
+  
+  3. @ResponseEntity:
+    ResponseEntity包含了ResponseBody语义，但是它能额外返回http状态码.
+    
+    例子1:
+      @RequestMapping(value="/{id}", method=GET)
+      public ResponseEntity<Spittle> findSpittle( @PathVariable long id){
+        Spittle spittle = repository.find(id);
+        HttpStatus status = spittle != null? HttpStatus.OK:HttpStatus.NOT_FOUND;
+        return new ResponseEntity<Spittle>(spittle, status);
+      }
+    例子2: 比1更进一步:
+      @RequestMapping(value="/{id}", method=GET)
+      public ResponseEntity<?> findSpittle( @PathVariable long id){
+        Spittle spittle = repository.find(id);
+        if (spittle == null){
+          Error error = new Error("not found id"+id);
+          return new ResponseEntity<Error>(error, HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<Spittle>(spittle, HttpStatus.OK);
+      }
+    例子3, 例子2的exception还是可以交给 @ExceptionHandler, 这样ResponseEntity也不用了.
+      注意这里exception的返回值:
+      @ResponseStatus(value=HttpStatus.NOT_FOUND, reason="NullPointException")
+      @ExceptionHandler(NullPointerException.class)
+      public Error npExp(NullPointerException e) {
+          return new Error(e.getMessage); //注意在构造NullPointerException或者其他exception的方法里可以包含更多信息.以便可以给error更多信息。
+      }
+    例子4, 如果希望简单修改返回状态码可以用:
+      @RequestMapping(method=RequestMethod.POST, consumes="application/json")
+      @ResponseStatus(HttpStatus.CREATED)
+      public @ResponseBody Spittle save(@RequestBody Spittle spittle){
+        ...
+        return spittle;
+      }
+    例子5， @ResponseEntity到底有什么好用的? 它可以写返回头信息.
+      注意UriComponentsBuilder的使用,它可以得到uri. 注意path的迭代处理.
+      @RequestMapping(method=RequestMethod.POST, consumes="application/json")
+      public ResponseEntity<Spittle> save(@RequestBody Spittle spittle, UriComponentsBuilder ucb){
+        Spittle spittle = saveSpittle(spittle);
+
+        HttpHeaders headers = new HttpHeaders();
+        //URI locationUri = URI.create(httpwebroot+"/spittles/"+spittle.getId()); //hardcode不好用ucb
+        URI locationUri = ucb.path("/spittles/").path(spittle.getId().toString()).build().toUri();
+
+        headers.setLocation(locationUri);
+        
+        //注意下面设置了spittle对象, header信息，以及状态码, 这个时候恋情ResponseEntity还是很强大的。
+        ResponseEntity<Spittle> rspEnt = new ResponseEntity<Spittle>(spittle, headers, HttpStatus.CREATED);
+        return rspEnt;
+      }
+    
+
+
+请求中接受资源的状态:
+  @RequestMapping(consumes="application/json") and @RequestBody
+  例子:
+    注意通过RequestMapping.consumers配置接收的类型;请求类型会在http header进行描述.
+    通过RequestBody来把json转化为对象.
+    @RequestMapping(method=RequestMethod.POST, consumes="application/json")
+    public @ResponseBody Spittle save(@RequestBody Spittle spittle){
+      ...
+      return spittle;
+    }
+ 
+
+写客户端:
+  使用RestTemplate: 注意getForObject, getForEntity等方法使用
+  例子1:
+    public Profile fetchFacebookProfile(String id){
+      RestTemplate rest = new RestTemplate();
+      return rest.getForObject("http://graph.facebook.com/{id}", Profile.class, id);
+    }
+
+---------------------------------------------------------------------------------------------------------------
+总结:
+1. 理解rest关注的是资源;
+2. 资源的表述如何控制？
+  response: (server->client)
+    @ResponseBody, @RestController, @ResponseEntity, @ResponseStatus / @ExceptionHandler
+  request: (client->server)
+    @RequestMapping: consumes/produces and @RequestBody.
+
+3. 客户端可以使用RestTemplate.
