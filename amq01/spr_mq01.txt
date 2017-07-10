@@ -1,0 +1,104 @@
+﻿JMS:
+1.发送消息步骤:
+  1) 配置ConnectionFactory: new ActiveMQConnectionFactory("tcp://192.168.0.106:61616"); 
+  2) 通过连接工厂建立Connection: conn = cf.createConnection();
+  3) 通过连接创建Session: session = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
+  4) 配置目的地Destination指向一个目标queue:  Destination destination = new ActiveMQQueue("sprexp.amq.q2"); 
+  5) 通过session创建消息生产者MessageProducer: MessageProducer producer = session.createProducer(destination);
+  6) 通过session创建一个消息Message: TextMessage message = session.createTextMessage();
+  7) 设置消息内容: message.setText("Hello mq!");
+  8) 通过消息生产者发送消息: producer.send(message);
+  9) finally释放资源.
+2. 接收消息步骤:
+  1) ~ 4) 相同; 其中第二步创建连接后要开始: conn.start();
+  5) 通过Session创建消息消费者MessageConsumer,指明消费的目的地(来源的queue): MessageConsumer consumer = session.createConsumer(destination);
+  6) 通过消费者接受消息: Message message = consumer.receive();
+  7) 对消息进行处理: TextMessage txtmessage = (TextMessage)message; String text = txtmessage.getText();
+  8) conn.close()
+  9) finally释放资源.
+PS：对于接收消息的处理需要注意!!!!:
+  1) 对于connection, 接受消息要conn.start()/conn.close(), 而发送消息不需要; 
+  2) 如果queue里面没有消息的话，这个线程会阻塞直到读到一个信息,而且只读一个信息，如果很多消息的话需要用循环.
+
+3. 使用JmsTemplate:
+  1) 在配置文件里面配置:
+    a. ConnectionFactory;
+    b. 配置JmsTemplate:
+      @Bean
+      public JmsTemplate jmsTemplate(){
+        return new JmsTemplate(new ActiveMQConnectionFactory("tcp://192.168.0.106:61616"));
+      }
+  2) 使用JmsTemplate：
+    @Autowired
+    JmsTemplate jmsTemplate;
+  3) 发送消息:
+    注意可以有更复杂的设置,下面是最简单的一种, 不设置reply，
+    jmsTemplate.send("sprexp.amq.q1", session->{return session.createTextMessage(message);});
+  4) 接受消息:
+    注意要处理exception.
+    Message msg = jmsTemplate.receive("sprexp.amq.q1");
+    TextMessage message = (TextMessage)msg;
+    try {
+      return message.getText();
+    } catch (JMSException e) {
+      throw new RuntimeException(e.getMessage(),e);
+    }
+  5) 消息转换: 都在org.springframework.jms.support.converter.
+    可以给JmsTemplate设置messageConverter
+    template.setMessageConverter(new SimpleMessageConverter());
+
+    SimpleMessageConverter实现这些互相转化:
+      String            -- TextMessage
+      Byte[]            -- ByteMessage
+      Map               -- MapMessage
+      Serializable对象  -- ObjectMessage
+    另外还有转化为json,xml的转化器.
+      MappingJacksonMessageConverter, MappingJackson2MessageConverter, MarshallingMessageConverter
+      相应的转化器还可以有自己的配置,具体查询javadoc.
+
+    发送消息:
+      调用jmsTemplate.convertAndSend可以把对象转化为对应的消息.
+    接收消息:
+      (String)jmsTemplate.receiveAndConvert("sprexp.amq.q1");
+----------------------------------------------------------------------
+注意, 上面接收消息的方法都是同步的,就是要阻塞到消息的到来.
+下面是异步方式接收消息:
+1. MDB (message-driven bean)
+  需要EJB容器:
+  对应javaee项目可以新建一个MDB.但对于javase可能有点麻烦，我没有去实现.
+  ejb容器有好处就是不用太多考虑多线程问题,缺点就是太笨重.
+2. Spring MDP (msg-driven pojo)
+  a. Configure: @EnableJms
+  b. 得到容器:
+      @Bean
+      public DefaultJmsListenerContainerFactory jmsListenerContainerFactory() {
+        DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
+        factory.setConnectionFactory(connectionFactory());
+        //factory.setDestinationResolver(destinationResolver());
+        factory.setConcurrency("3-10");
+        return factory;
+      }
+  c. 在一个 @Component里面定义一个监听器:
+      @JmsListener(destination = "sprexp.amq.q1")
+      public void autoGetMsg(String message) {
+        System.out.println("Listening msg: "+message);
+      }
+  d. 只要有这个目标的消息,监听器会自动执行处理任务.
+------------------------------------------------------------------------
+AMQP: advanced message queuing protocal 高级消息队列协议
+我的理解: 首先这是个协议, AMQP的线路层协议规范了消息的格式. 协议规定了格式,于是就实现了跨语言平台的协作.
+AMQP的优点除了上面那个还有: 消息的生产者和存放消息的队列是解耦的，这样可以定义规则实现更加丰富的消息模型.
+JMS的参与者有三个: 生产者,消费者,传递通道(队列或者主题).消息交换的地点是队列.
+  消息发送者-->队列-->接收者
+AMQP: 与jms不同之处在于增加了exchange路由:
+  生产者-->exchange-binding->queues-->消费者
+  所以通过不同的策略实现队列与exchange之间的binding.
+4中标准exchange:
+1. Direct: 消息的routing key与binding的routing key直接匹配,消息路由到该队列;
+2. Topic:  routing key符合通配符匹配,就路由;
+3. Headers: 消息参数表中头信息和值与binding参数表中相匹配
+4. Fanout: 所有都路由;
+
+
+  
+

@@ -1,0 +1,33 @@
+apply plugin: 'java'
+apply plugin: 'eclipse' 
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    //log4j2
+    compile "org.slf4j:slf4j-api:1.7.23"
+    compile "org.apache.logging.log4j:log4j-slf4j-impl:2.7"
+    compile "org.apache.logging.log4j:log4j-core:2.7"
+    
+    //core
+    compile("org.springframework:spring-context:$springVersion")
+    compile("org.aspectj:aspectjweaver:1.8.10")
+    compile "javax.inject:javax.inject:1"
+    
+    //db
+    compile "com.h2database:h2:1.4.194"
+    
+    //mq
+    compile "org.springframework:spring-jms:$springVersion"
+    compile "org.apache.activemq:activemq-spring:5.15.0"
+    compile "org.apache.xbean:xbean-spring:4.5"
+    
+	provided group: 'javax.ejb', name: 'ejb-api', version: '3.0'
+	
+    testCompile 'junit:junit:4.12'
+    testCompile("org.mockito:mockito-core:2.8.47")
+    testCompile("org.springframework:spring-test:$springVersion")
+}
+
