@@ -1,0 +1,60 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url "http://repo.spring.io/libs-snapshot" }
+        //jcenter()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.5.8.RELEASE")
+    }
+}
+apply plugin: 'java'
+apply plugin: 'eclipse'
+//apply plugin: 'idea'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'war'
+
+jar {
+    baseName = 'mysched'
+    version =  '0.1.0'
+}
+
+war {
+    baseName = 'myschedweb'
+    version =  '0.1.0'
+}
+
+repositories {
+    jcenter()
+}
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+dependencies {
+	
+	compile ("org.seleniumhq.selenium:selenium-server:$seleniumVer")
+	compile ("org.seleniumhq.selenium:selenium-java:$seleniumVer")
+	compile ("org.seleniumhq.selenium:selenium-java:$seleniumVer")
+	compile ("org.seleniumhq.selenium:selenium-api:$seleniumVer")
+	compile ("org.seleniumhq.selenium:selenium-chrome-driver:$seleniumVer")
+	compile ("org.seleniumhq.selenium:selenium-edge-driver:$seleniumVer")
+	compile ("org.seleniumhq.selenium:selenium-firefox-driver:$seleniumVer")
+	compile ("org.seleniumhq.selenium:selenium-ie-driver:$seleniumVer")
+	compile ("org.seleniumhq.selenium:selenium-opera-driver:$seleniumVer")
+	compile ("org.seleniumhq.selenium:selenium-safari-driver:$seleniumVer")
+	compile ("org.seleniumhq.selenium:selenium-remote-driver:$seleniumVer")
+	compile ("org.seleniumhq.selenium:selenium-support:$seleniumVer")
+
+	//compile ("com.google.code.gson:gson:2.8.2")
+	compile ("org.quartz-scheduler:quartz:$quartzVer")
+	compile ("org.quartz-scheduler:quartz-jobs:$quartzVer")
+	
+	compile ("org.springframework:spring-context-support:4.3.12.RELEASE")
+	compile ("org.springframework:spring-tx:4.3.12.RELEASE")
+	
+    compile("org.springframework.boot:spring-boot-starter-web")
+    testCompile('org.springframework.boot:spring-boot-starter-test')
+    testCompile('com.jayway.jsonpath:json-path')
+    
+    providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
+}
+
