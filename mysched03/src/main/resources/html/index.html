@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Welcome</title>
+
+    </head>
+<script src="jquery-3.2.1.min.js"></script>
+<script src="jquery.form.js"></script>
+<link rel="stylesheet" type="text/css"  href="jquery.datetimepicker.css" />
+<script src="jquery.datetimepicker.full.min.js"></script>
+<script type="text/javascript">
+	$(document).ready(function() {
+		jQuery('#run_time').datetimepicker();
+		
+		$('#runOnceForm').on('submit', function(e) {
+			e.preventDefault(); // prevent native submit
+			$(this).ajaxSubmit({
+				//url: 'http://rest-service.guides.spring.io/greeting'
+				target: '#output1',
+				dataType:'json',
+				beforeSubmit:  showRequest,
+				//success:       showResponse
+				success:       showJsonClean
+			});
+			//return false;
+		});
+		
+		
+	});
+	// pre-submit callback
+	function showRequest(formData, jqForm, options) {
+	    var queryString = $.param(formData);
+	    alert('About to submit: \n\n' + queryString);
+	    return true;
+	}
+	function showJsonClean(data, status, jqxhr, $form){
+		//alert(status);
+		$('#gtid').html(data.id);
+		$('#gtct').html(data.tcase.name);
+		$form.resetForm();
+		//$form.clearForm();
+	}
+	
+	// post-submit callback
+	function showResponse(responseText, statusText, xhr, $form)  {
+	    //alert('status: ' + statusText + '\n\nresponseText: \n' + responseText +
+	    //    '\n\nThe output div should have already been updated with the responseText.');
+	}        	
+</script>
+    <body>
+        <div id="input1">
+    		<form id="runOnceForm" action="/testplan/runOnce" method="post">
+    			<label>test case id: </label><input type="text" id="tcase_id" name="tcase_id"/><br>
+    			<label>Env ID: </label><input type="text" id="env_id" name="env_id"/><br>
+    			<label>Run At: </label><input type="text" id="run_time" name="run_time"/><br>
+    			<input type="submit" value="submit">
+    		</form>
+    	</div>
+    	<div id="output1">
+    		<p id="gtid"></p>
+            <p id="gtct"></p>
+    	</div>
+    </body>
+    <!-- this should go after your </body> -->
+
+</html>
