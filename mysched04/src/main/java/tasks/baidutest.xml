@@ -1,0 +1,13 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="Baidu Firefox">
+	<parameter name="driverLocation" value="D:/swused/selenium/webdrivers/geckodriver.exe" />
+	<parameter name="driverType" value="FireFox"/>
+	<parameter name="testUrl" value="https://www.baidu.com/"/>
+	<test name="baiduFireFoxTest1">
+		<classes>
+			<class name="tasks.UITestNG" />
+		</classes>
+	</test>
+</suite>
+
+
