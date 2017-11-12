@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+	<mvc:annotation-driven />
+	<context:component-scan base-package="com.ht.alphatest.controller" />
+
+	<bean id="viewResolver"
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/jsp/" />
+		<property name="suffix" value=".jsp" />
+		<property name="order" value="1" />
+	</bean>	
+ 
+	<bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+		<property name="basename">
+			<value>/WEB-INF/i18n/messages</value>
+		</property>
+		<property name="cacheSeconds">
+			<value>10</value>
+		</property>
+	</bean>
+	 
+	<bean id="jasperViewResolver"
+		class="org.springframework.web.servlet.view.jasperreports.JasperReportsViewResolver">
+		<property name="viewClass" value="org.springframework.web.servlet.view.jasperreports.JasperReportsMultiFormatView" />
+		<property name="prefix" value="/jasper/" />
+		<property name="suffix" value=".jasper" />
+		<property name="viewNames" value="rpt_*" />
+        <property name="reportDataKey" value="dataList"/>
+        <property name="exporterParameters">
+        	<map>
+                <entry key="net.sf.jasperreports.engine.export.JRHtmlExporterParameter.IS_USING_IMAGES_TO_ALIGN">
+                    <value>false</value>
+                </entry>
+                <entry key="net.sf.jasperreports.engine.export.JRHtmlExporterParameter.IS_OUTPUT_IMAGES_TO_DIR">
+                    <value>true</value>
+                </entry>
+                <entry key="net.sf.jasperreports.engine.export.JRHtmlExporterParameter.IMAGES_URI">
+                    <value>/c01rpt/image/</value>
+                </entry>
+            </map>
+        </property>
+        <property name="headers">
+            <props>
+                <prop key="content-type">text/html;charset=UTF-8</prop>
+                <prop key="character-encoding">UTF-8</prop>
+            </props>
+        </property>
+		<property name="order" value="0" />
+	</bean>
+	<!-- 
+	<mvc:resources mapping="/image/**" location="/image/" />
+	-->
+	<mvc:default-servlet-handler />
+
+</beans>

@@ -1,0 +1,122 @@
+/*
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url "http://repo.spring.io/libs-snapshot" }
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.5.8.RELEASE")
+    }
+}
+*/
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+//apply plugin: 'idea'
+//apply plugin: 'org.springframework.boot'
+apply plugin: 'war'
+
+jar {
+    baseName = 'AlphaTestMain'
+    version =  '0.1.0'
+}
+
+war {
+    baseName = 'AlphaTestWeb'
+    version =  '0.1.0'
+}
+eclipse {
+    wtp {
+        component {
+            contextPath = 'alphatest'
+        }
+    }
+}
+repositories {
+    jcenter()
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+dependencies {
+	//log4j
+    compile ("org.slf4j:slf4j-api:1.7.23")
+    compile ("log4j:log4j:1.2.17")
+    compile ("org.slf4j:log4j-over-slf4j:1.7.25")
+
+	//util
+	compile ("org.apache.commons:commons-lang3:3.1") 	
+	
+	//selenium use
+	compile ("org.seleniumhq.selenium:selenium-server:$seleniumVer")
+	compile ("org.seleniumhq.selenium:selenium-java:$seleniumVer")
+	compile ("org.seleniumhq.selenium:selenium-java:$seleniumVer")
+	compile ("org.seleniumhq.selenium:selenium-api:$seleniumVer")
+	compile ("org.seleniumhq.selenium:selenium-chrome-driver:$seleniumVer")
+	compile ("org.seleniumhq.selenium:selenium-edge-driver:$seleniumVer")
+	compile ("org.seleniumhq.selenium:selenium-firefox-driver:$seleniumVer")
+	compile ("org.seleniumhq.selenium:selenium-ie-driver:$seleniumVer")
+	compile ("org.seleniumhq.selenium:selenium-opera-driver:$seleniumVer")
+	compile ("org.seleniumhq.selenium:selenium-safari-driver:$seleniumVer")
+	compile ("org.seleniumhq.selenium:selenium-remote-driver:$seleniumVer")
+	compile ("org.seleniumhq.selenium:selenium-support:$seleniumVer")
+	
+	//quartz+spring use
+	compile ("org.quartz-scheduler:quartz:$quartzVer")
+	compile ("org.quartz-scheduler:quartz-jobs:$quartzVer")
+	compile ("org.springframework:spring-context-support:$springVer")
+	compile ("org.springframework:spring-tx:$springVer")
+
+	//jpa springdata
+	compile ("org.springframework:spring-context:$springVer")
+	compile ("org.springframework:spring-orm:$springVer")
+	compile ("org.springframework.data:spring-data-jpa:1.11.8.RELEASE")
+	compile ("org.hibernate:hibernate-core:5.2.12.Final")
+	compile ("org.hibernate:hibernate-entitymanager:5.2.12.Final")
+    compile ("javax.inject:javax.inject:1")
+    //datasource pool   
+    compile ('commons-dbcp:commons-dbcp:1.4') //compile ('org.apache.commons:commons-dbcp2:2.1.1')
+	//jdbc driver
+	compile ('mysql:mysql-connector-java:6.0.6')
+	
+	//SpringMVC
+	compile ("org.springframework:spring-webmvc:$springVer")
+	
+	//Tiles
+	/*
+	compile 'com.fasterxml:classmate:1.3.3'
+    //compile 'org.aspectj:aspectjweaver:1.8.10'
+    compile ("org.apache.tiles:tiles-core:$tilesVersion") {
+        exclude group: 'org.slf4j'
+    }
+    compile ("org.apache.tiles:tiles-jsp:$tilesVersion") {
+        exclude group: 'org.slf4j'
+    }*/
+    
+    //jstl: jsp tag lib
+    compile "javax.servlet:jstl:1.2"
+    
+    //Jasper report
+    /*
+    compile "net.sf.jxls:jxls-core:1.0.5"
+    compile "dom4j:dom4j:1.6.1"
+    compile "jaxen:jaxen:1.1.6"
+    compile "net.sf.jasperreports:jasperreports:5.6.1"
+    compile "org.codehaus.groovy:groovy-all:2.0.1"
+    compile "com.lowagie:itext:2.1.7"
+	*/
+	
+    providedCompile "javax.servlet:javax.servlet-api:3.1.0"
+    providedCompile "javax.servlet.jsp:jsp-api:2.2"
+    providedCompile "javax.el:javax.el-api:3.0.0"
+    
+    testCompile 'junit:junit:4.12'
+    testCompile "junit:junit-dep:4.11"
+    testCompile "org.springframework:spring-test:$springVer"
+    testCompile "org.mockito:mockito-core:2.7.9"
+    testCompile 'com.github.stefanbirkner:system-rules:1.16.1'
+    testCompile "org.hamcrest:hamcrest-library:1.3"
+	
+}
+

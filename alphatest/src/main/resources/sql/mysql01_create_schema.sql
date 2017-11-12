@@ -1,0 +1,1 @@
+CREATE SCHEMA `alphatest` DEFAULT CHARACTER SET utf8 ;
