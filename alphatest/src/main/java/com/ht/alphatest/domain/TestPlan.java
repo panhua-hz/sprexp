@@ -31,6 +31,9 @@ public class TestPlan {
 	@Column(name="schedule_config")
 	private String scheduleConfig;
 	
+	@Column(name="status")
+	private String status;
+	
 	@ManyToOne(fetch=FetchType.EAGER, optional=false, targetEntity=Project.class)
 	@JoinColumn(name="project_id", nullable=false, updatable=false)
 	private Project project;
@@ -61,26 +64,28 @@ public class TestPlan {
 		
 	}
 	public TestPlan(String planName, TargetEnv targetEnv, String scheduleConfig, Project project,
-			String platform, String createdBy, Date createdAt,
+			String platform, String status, String createdBy, Date createdAt,
 			List<TestCase> testcases) {
 		this.planName = planName;
 		this.targetEnv = targetEnv;
 		this.scheduleConfig = scheduleConfig;
 		this.project = project;
 		this.platform = platform;
+		this.status = status;
 		this.createdBy = createdBy;
 		this.createdAt = createdAt;
 		this.testcases = testcases;
 	}
 	
 	public TestPlan(String planName, TargetEnv targetEnv, String scheduleConfig, Project project,
-			String platform, String createdBy, Date createdAt, String updatedBy, Date updatedAt,
+			String platform, String status, String createdBy, Date createdAt, String updatedBy, Date updatedAt,
 			List<TestCase> testcases) {
 		this.planName = planName;
 		this.targetEnv = targetEnv;
 		this.scheduleConfig = scheduleConfig;
 		this.project = project;
 		this.platform = platform;
+		this.status = status;
 		this.createdBy = createdBy;
 		this.createdAt = createdAt;
 		this.updatedBy = updatedBy;
@@ -88,7 +93,7 @@ public class TestPlan {
 		this.testcases = testcases;
 	}
 	public TestPlan(Long planId, String planName, TargetEnv targetEnv, String scheduleConfig, Project project,
-			String platform, String createdBy, Date createdAt, String updatedBy, Date updatedAt,
+			String platform, String status, String createdBy, Date createdAt, String updatedBy, Date updatedAt,
 			List<TestCase> testcases) {
 		this.planId = planId;
 		this.planName = planName;
@@ -96,6 +101,7 @@ public class TestPlan {
 		this.scheduleConfig = scheduleConfig;
 		this.project = project;
 		this.platform = platform;
+		this.status = status;
 		this.createdBy = createdBy;
 		this.createdAt = createdAt;
 		this.updatedBy = updatedBy;
@@ -138,6 +144,12 @@ public class TestPlan {
 	public void setPlatform(String platform) {
 		this.platform = platform;
 	}
+	public String getStatus() {
+		return status;
+	}
+	public void setStatus(String status) {
+		this.status = status;
+	}
 	public String getCreatedBy() {
 		return createdBy;
 	}
@@ -168,6 +180,11 @@ public class TestPlan {
 	public void setTestcases(List<TestCase> testcases) {
 		this.testcases = testcases;
 	}
-	
-	
+	@Override
+	public String toString() {
+		return "TestPlan [planId=" + planId + ", planName=" + planName + ", targetEnv=" + targetEnv
+				+ ", scheduleConfig=" + scheduleConfig + ", status=" + status + ", project=" + project + ", platform="
+				+ platform + ", createdBy=" + createdBy + ", createdAt=" + createdAt + ", updatedBy=" + updatedBy
+				+ ", updatedAt=" + updatedAt + ", testcases=" + testcases + "]";
+	}
 }

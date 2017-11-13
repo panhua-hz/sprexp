@@ -10,22 +10,18 @@ import javax.persistence.Id;
 public class Project {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	@Column(name="project_id")
+	@Column(name="Id")
 	private Long projectId;
 	
-	@Column(name="project_name")
-	private String projectName;
+	@Column(name="name")
+	private String name;
 	
-
+	@Column(name="shortname")
+	private String shortname;
+	
 	public Project() {
 		
 	}
-	
-	public Project(Long projectId) {
-		this.projectId = projectId;
-	}
-
-
 
 	public Long getProjectId() {
 		return projectId;
@@ -35,13 +31,24 @@ public class Project {
 		this.projectId = projectId;
 	}
 
-	public String getProjectName() {
-		return projectName;
+	public String getName() {
+		return name;
 	}
 
-	public void setProjectName(String projectName) {
-		this.projectName = projectName;
+	public void setName(String name) {
+		this.name = name;
 	}
-	
-	
+
+	public String getShortname() {
+		return shortname;
+	}
+
+	public void setShortname(String shortname) {
+		this.shortname = shortname;
+	}
+
+	@Override
+	public String toString() {
+		return "Project [projectId=" + projectId + ", name=" + name + ", shortname=" + shortname + "]";
+	}
 }

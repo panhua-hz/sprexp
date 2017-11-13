@@ -1,9 +1,10 @@
-CREATE TABLE `project` (
-  `project_id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `project_name` varchar(30) NOT NULL,
-  PRIMARY KEY (`project_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+USE `alphatest`;
 
+DROP TABLE IF EXISTS `test_plan_suite`;
+DROP TABLE IF EXISTS `test_round_data`;
+DROP TABLE IF EXISTS `test_steps`;
+
+DROP TABLE IF EXISTS `key_words`;
 CREATE TABLE `key_words` (
   `keyword_id` bigint(20) NOT NULL AUTO_INCREMENT,
   `keyword_name` varchar(50) NOT NULL,
@@ -12,6 +13,7 @@ CREATE TABLE `key_words` (
   PRIMARY KEY (`keyword_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `target_env`;
 CREATE TABLE `target_env` (
   `env_id` bigint(20) NOT NULL AUTO_INCREMENT,
   `env_name` varchar(50) NOT NULL,
@@ -25,17 +27,17 @@ CREATE TABLE `target_env` (
   PRIMARY KEY (`env_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `test_case`;
 CREATE TABLE `test_case` (
   `case_id` bigint(20) NOT NULL AUTO_INCREMENT,
   `case_version` bigint(20) NOT NULL,
   `project_id` bigint(20) NOT NULL,
   `case_track_id` bigint(20) DEFAULT NULL,
   `referenced` int(1) DEFAULT '0',
-  PRIMARY KEY (`case_id`),
-  KEY `FK_TC_2_idx` (`project_id`),
-  CONSTRAINT `FK_TC_2` FOREIGN KEY (`project_id`) REFERENCES `project` (`project_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+  PRIMARY KEY (`case_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `test_case_track`;
 CREATE TABLE `test_case_track` (
   `case_track_id` bigint(20) NOT NULL AUTO_INCREMENT,
   `case_id` bigint(20) NOT NULL,
@@ -50,11 +52,10 @@ CREATE TABLE `test_case_track` (
   `updated_by` varchar(30) DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`case_track_id`),
-  KEY `idx_testcase_track` (`case_id`,`case_version`) USING BTREE,
-  KEY `FK_TCT_1_idx` (`project_id`),
-  CONSTRAINT `FK_TCT_1` FOREIGN KEY (`project_id`) REFERENCES `project` (`project_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+  KEY `idx_testcase_track` (`case_id`,`case_version`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+/*DROP TABLE IF EXISTS `test_steps`;*/
 CREATE TABLE `test_steps` (
   `step_id` bigint(20) NOT NULL AUTO_INCREMENT,
   `case_track_id` bigint(20) NOT NULL,
@@ -73,6 +74,7 @@ CREATE TABLE `test_steps` (
   CONSTRAINT `FK_TS_2` FOREIGN KEY (`keyword_id`) REFERENCES `key_words` (`keyword_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+/*DROP TABLE IF EXISTS `test_round_data`;*/
 CREATE TABLE `test_round_data` (
   `round_data_id` bigint(20) NOT NULL AUTO_INCREMENT,
   `case_track_id` bigint(20) NOT NULL,
@@ -86,6 +88,7 @@ CREATE TABLE `test_round_data` (
   CONSTRAINT `FK_TRD_2` FOREIGN KEY (`step_id`) REFERENCES `test_steps` (`step_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `test_plan`;
 CREATE TABLE `test_plan` (
   `plan_id` bigint(20) NOT NULL AUTO_INCREMENT,
   `plan_name` varchar(50) NOT NULL,
@@ -93,15 +96,15 @@ CREATE TABLE `test_plan` (
   `platform` varchar(10) DEFAULT NULL,
   `env_id` bigint(20) NOT NULL,
   `schedule_config` varchar(255) DEFAULT NULL,
+  `status` varchar(50) DEFAULT NULL,
   `created_by` varchar(30) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_by` varchar(30) DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
-  PRIMARY KEY (`plan_id`),
-  KEY `FK_TP_1_idx` (`project_id`),
-  CONSTRAINT `FK_TP_1` FOREIGN KEY (`project_id`) REFERENCES `project` (`project_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+  PRIMARY KEY (`plan_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+/*DROP TABLE IF EXISTS `test_plan_suite`;*/
 CREATE TABLE `test_plan_suite` (
   `plan_id` bigint(20) NOT NULL,
   `case_id` bigint(20) NOT NULL,
@@ -111,6 +114,7 @@ CREATE TABLE `test_plan_suite` (
   CONSTRAINT `FK_TPS_2` FOREIGN KEY (`case_id`) REFERENCES `test_case` (`case_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `test_execute_plan_log`;
 CREATE TABLE `test_execute_plan_log` (
   `execute_plan_id` bigint(20) NOT NULL AUTO_INCREMENT,
   `plan_id` bigint(20) NOT NULL,
@@ -122,6 +126,7 @@ CREATE TABLE `test_execute_plan_log` (
   PRIMARY KEY (`execute_plan_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `test_execute_log`;
 CREATE TABLE `test_execute_log` (
   `execute_id` bigint(20) NOT NULL AUTO_INCREMENT,
   `execute_plan_id` bigint(20) NOT NULL,
@@ -133,6 +138,7 @@ CREATE TABLE `test_execute_log` (
   PRIMARY KEY (`execute_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `test_execute_step_log`;
 CREATE TABLE `test_execute_step_log` (
   `execute_step_id` bigint(20) NOT NULL AUTO_INCREMENT,
   `execute_id` bigint(20) DEFAULT NULL,
@@ -141,3 +147,5 @@ CREATE TABLE `test_execute_step_log` (
   `step_log` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`execute_step_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+commit;
